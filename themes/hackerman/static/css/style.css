@@ -18,7 +18,10 @@ body {
 main {
     padding: 0 1rem 2rem 1rem;
     max-width: 800px;
+    min-height: 100%;
     font-family: "EB Garamond", serif;
+    display: flex;
+    flex-direction: column;
     margin: 0 auto;
 }
 
@@ -30,6 +33,7 @@ main {
 }
 
 nav {
+    flex-grow: 0.2;
     display: flex;
     justify-content: flex-end;
     padding: 2rem;
@@ -40,8 +44,8 @@ nav {
 }
 
 a {
-    color: #009db1;
-    text-decoration: none;
+    color: black;
+    text-decoration: underline;
 }
 
 a:hover {

@@ -23,10 +23,7 @@
     <body>
         <main>
             {{- partial "header.html" . -}}
-            <div class="letter">
-                <div class="letter-head">
-                    <div class="letter-head-address"></div>
-                </div>
+            <div class="mainPage">
                 <div id="content">{{- block "main" . }}{{- end }}</div>
                 {{- partial "footer.html" . -}}
             </div>
