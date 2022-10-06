@@ -1,0 +1,31 @@
+name: hugo CI
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: true
+                  fetch-depth: 1
+
+            - name: Setup Hugo
+              uses: peaceiris/actions-hugo@v2
+              with:
+                  hugo-version: "latest"
+
+            - name: Build
+              run: hugo
+
+            - name: Deploy
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  personal_token: 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
+                  external_repository: personaelabs/personaelabs.github.io
+                  publish_branch: main
+                  publish_dir: ./public
