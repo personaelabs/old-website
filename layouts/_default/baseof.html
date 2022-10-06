@@ -23,7 +23,7 @@
     <body>
         <main>
             {{- partial "header.html" . -}}
-            <div class="mainPage">
+            <div {{- if .IsHome -}} class="mainPage" {{- end -}}>
                 <div id="content">{{- block "main" . }}{{- end }}</div>
                 {{- partial "footer.html" . -}}
             </div>

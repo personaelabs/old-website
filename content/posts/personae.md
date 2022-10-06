@@ -1,11 +1,11 @@
 ---
 title: "Introducing Personae Labs"
-date: 2022-09-02T22:12:03.284Z
+date: 2022-10-02T22:12:03.284Z
 type: posts
 draft: false
 slug: "personae"
 category: "3 mins read"
-tags: ["crypto"]
+tags: ["identity", ""]
 description: "Introducing Personae Labs, an R&D lab investigating the future of human expression online"
 ---
 
