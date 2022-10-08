@@ -14,3 +14,8 @@ description = "Tools for character creation"
     pre = "pen-tool"
     url = "/posts/"
     weight = 2
+  [[menu.main]]
+    name = "GitHub"
+    pre = "github"
+    url = "https://github.com/personaelabs"
+    weight = 3
