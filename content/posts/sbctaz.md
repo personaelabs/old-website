@@ -3,7 +3,7 @@ title: "In-person heyanon at SBC"
 date: 2022-10-11T22:12:03.284Z
 author: vivboop
 type: posts
-draft: true
+draft: false
 slug: "sbcheyanon"
 category: "5 mins read"
 tags: ["heyanon", ""]
