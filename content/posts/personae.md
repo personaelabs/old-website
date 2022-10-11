@@ -5,7 +5,7 @@ type: posts
 draft: false
 slug: "personae"
 category: "3 mins read"
-tags: ["identity", ""]
+tags: ["identity"]
 description: "Introducing Personae Labs, an R&D lab investigating the future of human expression online"
 ---
 
