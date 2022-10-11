@@ -6,7 +6,7 @@ type: posts
 draft: false
 slug: "sbcheyanon"
 category: "5 mins read"
-tags: ["heyanon", ""]
+tags: ["heyanon", "PSE"]
 description: "Reviewing heyanon's in-person group experiments at SBC"
 ---
 
