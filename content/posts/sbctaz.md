@@ -21,7 +21,11 @@ Unfortunately, privately proving membership in an ECDSA group with a SNARK is ve
 
 However, our good friends at [PSE](https://appliedzkp.org/) saw this coming from miles away and created a more efficient private group membership primitive: [Semaphore](https://semaphore.appliedzkp.org/), built on the SNARK-friendly Poseidon hash! Their codebase and documentation is _wonderful_, and they explain the construction better than I ever could [here](https://semaphore.appliedzkp.org/docs/guides/identities).
 
-For the sake of this post, you can think of the Semaphore construction as setting the user's private key to be a string $s$ and their public key to be $\text{Poseidon}(s)$. You can then prove ownership of a private key $sk$ corresponding to a public key $pk$ with a SNARK: pass $sk$ as a private input and $pk$ as a public input, and then verify $pk = \text{Poseidon}(sk)$. Private group membership is achieved by additionally doing a merkle tree membership proof of $pk$ inside the SNARK. This works out to a constant number of Poseidon hashes, which is efficient enough that these proofs can be generated on a mobile device in a few seconds!
+For the sake of this post, you can think of the Semaphore construction as setting the user's private key to be a string $s$ and their public key to be $\text{Poseidon}(s)$.
+
+You can then prove ownership of a private key $sk$ corresponding to a public key $pk$ with a SNARK: pass $sk$ as a private input and $pk$ as a public input, and then verify $pk = \text{Poseidon}(sk)$.
+
+Private group membership is achieved by additionally doing a merkle tree membership proof of $pk$ inside the SNARK. This works out to a constant number of Poseidon hashes, which is efficient enough that these proofs can be generated on a mobile device in a few seconds!
 
 ### In-person heyanon?
 
@@ -31,7 +35,11 @@ As clever as Semaphore is, there aren't that many Semaphore groups in the wild y
 
 We printed out 200 of these codes on business cards, and handed them out to attendees of SBC's Applied ZK Workshop as they entered in. If they scanned the QR code, it took them to a page where they could ZK prove they knew one of the private keys in the 200-person SBC group and then post a message anonymously to @TheZKGuild Twitter feed.
 
-But just being able to anonymously post as a verified conference attendee isn't very interesting. So we had two add-ons to spice things up. First, instead of everyone being an "attendee", we put people in **different groups based on their role in the conference**: attendees, presenters, previous attendees, and organizers. This allowed for people to attach some "reputation" to their tweets, enabling a new dimension of communication without sacrificing too much anonymity. Second, we used the @TheZKGuild primarily **for anonymous Q&A during presentations**. ZK tech can be quite complex, and asking a question in front of the world's best cryptographers can be pretty scary. So we reasoned that having an anonymous feed to post questions would make it easier for confused folks to speak up, and thus let everyone understand the material better!
+But just being able to anonymously post as a verified conference attendee isn't very interesting. So we had two add-ons to spice things up.
+
+First, instead of everyone being an "attendee", we put people in **different groups based on their role in the conference**: attendees, presenters, previous attendees, and organizers. This allowed for people to attach some "reputation" to their tweets, enabling a new dimension of communication without sacrificing too much anonymity.
+
+Second, we used the @TheZKGuild primarily **for anonymous Q&A during presentations**. ZK tech can be quite complex, and asking a question in front of the world's best cryptographers can be pretty scary. So we reasoned that having an anonymous feed to post questions would make it easier for confused folks to speak up, and thus let everyone understand the material better!
 
 ### Highlighting the _magic_ of ZK
 
