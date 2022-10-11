@@ -26,7 +26,7 @@ For the sake of this post, you can think of the Semaphore construction as settin
 
 ## In-person heyanon?
 
-As clever as Semaphore is, there aren't that many Semaphore groups in the wild yet. However, because the private key is just a string $s$, Semaphore makes setting up in-person groups very simple. The method we opted for was to randomly generate private keys for members, and then just hand them out in QR code form:
+As clever as Semaphore is, there aren't that many Semaphore groups in the wild yet. However, because the private key is just a string _s_, Semaphore makes setting up in-person groups very simple. The method we opted for was to randomly generate private keys for members, and then just hand them out in QR code form:
 
 ![Example heyanon QR](../../media/heyanonqr.png)
 
