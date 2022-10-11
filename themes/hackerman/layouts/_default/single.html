@@ -1,5 +1,5 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
-{{ partial "metadata.html" . }}
-<br /><br />
+<span> by <b> {{ range .Param "authors" }} {{ . }} {{ end }} </b> on </span>
+{{ partial "metadata.html" . }} <br /><br />
 {{ .Content }} {{ end }}

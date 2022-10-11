@@ -1,6 +1,7 @@
 ---
 title: "Introducing Personae Labs"
-date: 2022-10-02T22:12:03.284Z
+date: 2022-09-19T22:12:03.284Z
+authors: ["Personae core"]
 type: posts
 draft: false
 slug: "personae"
