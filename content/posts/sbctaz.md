@@ -62,7 +62,7 @@ ZK getting people philosophical...fair enough...
 
 ![Catalonia](../../media/tweet8094.png)
 
-And my favorite of all, a little tweet exchange supporting Catalonia. A guess I have for the "Alchemist" is Vitalik (a previous workshop attendee who spent some time in Barcelona before Ethereum was founded). And a guess I have for the "Wizard" is Jordi Baylina (a workshop presenter who is a big Catalonia supporter). But the beauty of heyanon is I'll never know for sure!
+Finally, a little tweet exchange supporting Catalonia. A guess I have for the "Alchemist" is Vitalik (a previous workshop attendee who spent some time in Barcelona before Ethereum was founded). And a guess I have for the "Wizard" is Jordi Baylina (a workshop presenter who is a big Catalonia supporter). But the beauty of heyanon is I'll never know for sure!
 
 ### PSE's 10x better version: TAZ
 
