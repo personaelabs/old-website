@@ -36,9 +36,11 @@ But just being able to anonymously post as a verified conference attendee isn't 
 
 ## Highlighting the _magic_ of ZK
 
-Any ZK developer will tell you that their work feels like a glitch in the universe. It shouldn't be possible to get _privacy, succinctness, and verifiability_ all in one tool, but somehow the math all works out. But in my opinion, technical terms like "witnesses", "proving", "verify", "zero-knowledge", and "elliptic curve pairings" mask how utterly magical this technology is to the average person.
+Any ZK developer will tell you that their work feels like a glitch in the universe. It shouldn't be possible to get _privacy, succinctness, and verifiability_ all in one tool, but somehow the math all works out. But in our opinion, technical terms like "witnesses", "proving", "verify", "zero-knowledge", and "elliptic curve pairings" mask how utterly magical this technology is to the average person.
 
-So a separate goal of in-person heyanon was to use magical terminology for every part of the ZK stack, just to try something new. The Semaphore private key became your _artifact_. Instead of creating proofs, you used your artifact to _cast spells_. Each of the conference roles became magical too: attendees were _magicians_, presenters were _wizards_, previous attendees were _alchemists_, and organizers were _sorcerers_. Isn't that just so much more fun?
+So a separate goal of in-person heyanon was to use new, magical terminology for every part of the ZK stack. The Semaphore private key became your _artifact_. Instead of creating proofs, you used your artifact to _cast spells_. Each of the conference roles became magical too: attendees were _magicians_, presenters were _wizards_, previous attendees were _alchemists_, and organizers were _sorcerers_.
+
+Isn't that just so much more fun?
 
 ## Feed highlights
 
