@@ -19,3 +19,8 @@ description = "Tools for character creation"
     pre = "github"
     url = "https://github.com/personaelabs"
     weight = 3
+  [[menu.main]]
+    name = "Discord"
+    pre = "discord"
+    url = "https://discord.gg/ZVWhZrbkRV"
+    weight = 4
