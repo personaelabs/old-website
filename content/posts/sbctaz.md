@@ -40,7 +40,7 @@ Any ZK developer will tell you that their work feels like a glitch in the univer
 
 So a separate goal of in-person heyanon was to use new, magical terminology for every part of the ZK stack. The Semaphore private key became your _artifact_. Instead of creating proofs, you used your artifact to _cast spells_. Each of the conference roles became magical too: attendees were _magicians_, presenters were _wizards_, previous attendees were _alchemists_, and organizers were _sorcerers_.
 
-Isn't that just so much more fun? These ideas are heavily inspired by converstions with Justin Glibert of [Lattice](https://mud.dev/blog/autonomous-worlds)/0xPARC, who's constantly trying to make the world more playful.
+Isn't that just so much more fun? These ideas are heavily inspired by converstions with Justin Glibert of [Lattice](https://mud.dev/blog/autonomous-worlds)/0xPARC, whose work aims to make the world more playful.
 
 ## Feed highlights
 
