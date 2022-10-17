@@ -40,7 +40,7 @@ Any ZK developer will tell you that their work feels like a glitch in the univer
 
 So a separate goal of in-person heyanon was to use new, magical terminology for every part of the ZK stack. The Semaphore private key became your _artifact_. Instead of creating proofs, you used your artifact to _cast spells_. Each of the conference roles became magical too: attendees were _magicians_, presenters were _wizards_, previous attendees were _alchemists_, and organizers were _sorcerers_.
 
-Isn't that just so much more fun?
+Isn't that just so much more fun? These ideas are heavily inspired by converstions with Justin Glibert of [Lattice](https://mud.dev/blog/autonomous-worlds)/0xPARC, who's constantly trying to make the world more playful.
 
 ## Feed highlights
 
@@ -64,7 +64,7 @@ Finally, a little tweet exchange supporting Catalonia. A guess I have for the "A
 
 ## PSE's 10x better version: TAZ
 
-The SBC heyanon experiments were hacked together 1-2 days before SBC, so some sacrifices were made for ease of implementation and usage. One major shortcoming was that all private keys were generated prior to the event by me. This meant the UX was super smooth for users as they didn't have to register a new pair the first time they used the app, but it technically gave me the power to impersonate any role. To maintain integrity of the feed, I ended up not posting anything except a shoutout to PSE for building Semaphore. Another major shortcoming was that groups were stored in a standard centralized database. This meant I could technically revoke or block certain public keys without users knowing!
+The SBC heyanon experiments were hacked together quickly before SBC, so some sacrifices were made for ease of implementation and usage. One major shortcoming was that all private keys were generated prior to the event by me. This meant the UX was super smooth for users as they didn't have to register a new pair the first time they used the app, but it technically gave me the power to impersonate any role. To maintain integrity of the feed, I ended up not posting anything except a shoutout to PSE for building Semaphore. Another major shortcoming was that groups were stored in a standard centralized database. This meant I could technically revoke or block certain public keys without users knowing!
 
 Unbeknownst to me, PSE had been hacking on a more secure and better designed version of in-person groups for Devcon, which they've termed the [Temporary Anonymous Zone](https://taz.appliedzkp.org/) (TAZ). Instead of handing out private keys directly, they hand out single-use invite links. When a user signs up, TAZ randomly generates a private key for them and stores it in the browser's localStorage, meaning TAZ never interacts with it. They also maintain the group in a public Semaphore smart contract, which prevents any malicious tampering from occurring. Classic PSE, 10 steps ahead!
 
