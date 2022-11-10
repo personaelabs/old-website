@@ -1,9 +1,9 @@
 ---
-title: ""
+title: "How ECDSA Nullifiers Unlock New ZK Pseudonymity Paradigms"
 date: 2022-10-12T02:12:03.284Z
 authors: ["yush_g"]
 type: posts
-draft: true
+draft: false
 slug: "nullifier"
 category: "20 mins read"
 tags: ["nullifier", "zk"]

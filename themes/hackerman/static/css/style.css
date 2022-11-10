@@ -45,6 +45,23 @@ main {
   text-align: center;
 }
 
+.footnote-ref {
+	padding: 0.05em 0.2em;
+	font-size: 0.8em;
+}
+
+#notes {
+	font-size: 1.2em;
+}
+
+.footnotes {
+  font-size: 0.8em;
+}
+
+.footnotes ol {
+	padding: 0em 1em;
+}
+
 p,
 li {
   font-size: 1.2em;
