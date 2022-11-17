@@ -1,5 +1,5 @@
 ---
-title: "How ECDSA Nullifiers Unlock New ZK Pseudonymity Paradigms"
+title: "ECDSA nullifiers and their applications"
 date: 2022-10-12T02:12:03.284Z
 authors: ["yush_g"]
 type: posts
@@ -10,17 +10,15 @@ tags: ["nullifier", "zk"]
 description: "Unique pseudonymity??"
 ---
 
-**How ECDSA Nullifiers Unlock New ZK Pseudonymity Paradigms**
+**ZK ID systems**
 
-**ZK ID Systems**
-
-Spurred by new advances like circom, groth16, and tornado.cash, [ZK-SNARKS](https://ethereum.org/en/zero-knowledge-proofs/) (Zero Knowledge Succinct Non-interactive ARguments of Knowledge) are already deployed in many real world settings. Zero knowledge identity systems based on anonymous proof-of-ownership are poised to be an interesting social experimentation tool in the coming years -- in order to unleash the full power of these systems, one critical primitive is deterministic nullifiers, an idea we will explain in this post. Specifically, the ability to reveal specific parts of your identity in lieu of the whole is an interesting new primitive that allows provable on chain identities like “BAYC holder” or “LP provider on Uniswap in last 24 hours” or maybe even one day “people with a mutation in the XYZ gene”, and early versions of such pseudonymous identity already exist, like [cabal](https://www.cabal.xyz/).
+Spurred by new advances like circom, groth16, and tornado.cash, [zkSNARKs](https://ethereum.org/en/zero-knowledge-proofs/) are already deployed in many real world settings. Zero knowledge identity systems based on anonymous proof-of-ownership are poised to be an interesting social experimentation tool in the coming years -- in order to unleash the full power of these systems, one critical primitive is deterministic nullifiers, an idea we will explain in this post. Specifically, the ability to reveal specific parts of your identity in lieu of the whole is an interesting new primitive that allows provable on chain identities like “BAYC holder” or “LP provider on Uniswap in last 24 hours” or maybe even one day “people with a mutation in the XYZ gene”, and early versions of such pseudonymous identity already exist, like [cabal](https://www.cabal.xyz/).
 
 This is done via a zero knowledge proof of knowledge that their account satisfies that property without revealing who they are. Set membership proofs are a typical [usecase of zk-snarks for privacy](https://vitalik.ca/general/2022/06/15/using_snarks.html), and we can imagine a zk proof of the form "I can prove that I own the private key [via generating a valid signature], for some public key that is a leaf of the Merkle tree comprised of all eligible set members, with this public Merkle root." Signatures via ECDSA are nondeterministic, meaning a signer can produce an arbitrary number of signatures for a message. However, they do provide non-repudiation of signed data (i.e. it proves they signed it). We ultimately enable unique pseudonymity by deploying verifiably unique signatures on Ethereum.
 
 This enables applications such as [semi-anonymous message boards](https://twitter.com/heyanonxyz), since a user merely needs to prove existence of at least 1 valid signature per message in order to be sure that such a message is legitimate. However, such applications have the advantage that there is no uniqueness constraint on the provers: that is, the same wallet proving themselves as a member multiple times is intended behavior. However, there are many applications that require a maximum of one action per user, like claiming an airdrop.
 
-**Why One Address Should Only Have One Nullifier per Application**
+**One address <-> one nullifier**
 
 For a concrete example, [a zero knowledge airdrop](https://github.com/nalinbhardwaj/stealthdrop) requires that an anonymous claimer can produce some unique public identifier of a claim to a single address on an airdrop, that does not reveal the value of that address. One can imagine a "claimer" can send a zk-proof of knowledge of set membership and private key ownership (whether through signature verification or something else). A public nullifier signal ensures they cannot claim again in the future. This unique public identifier is coined a "nullifier" because the address nullifies its ability to perform the action again.
 
@@ -42,7 +40,7 @@ Beyond improvements to existing apps, noninteractivity enables new use cases for
 
 Let’s review the properties we want in this nullifier. If we want to forbid actions like double spending or double claiming, we need them to be unique per account. Because ECDSA signatures are nondeterministic, signatures don’t suffice; we need a new deterministic function, verifiable with only the public key. We want the nullifier to be non-interactive, to uniquely identify the keypair yet keep the account identity secret. The key insight is that such nullifiers can be used as a public commitment to a specific anonymous account.
 
-**A Promising New Standard**
+**A promising new standard**
 
 Consider a signature that has two parts: a deterministic part based on a message [like hash(message)<sup>sk</sup> (mod p)] and secret key, and a non-deterministic part that allows it to be a signature algorithm. Then, we could use the deterministic part as a nullifier, and use both the deterministic and non-deterministic part to verify that it is a valid signature using only the public key.
 
@@ -81,7 +79,7 @@ Finally, all 6 of the signals emitted by the secure enclave, leaving no way to d
 
 This is promising since hardware wallets only need to be able to calculate hash functions, not entire ZK systems, whose security has yet to be formally verified and whose implementations we can likely see evolving over the next few years.
 
-**The Interactivity-Quantum Secrecy Tradeoff**
+**The interactivity-quantum secrecy tradeoff**
 
 Note that in the far future, once quantum computers can break ECDSA keypair security, most Ethereum keypairs will be broken, but migration to a quantum resistant keypair in advance will keep active funds safe. Specifically, people can merely sign messages committing to new quantum-resistant keypairs (or just higher bit keypairs on similar algorithms), and the canonical chain can fork to make such keypairs valid. ZK-SNARKs become forgeable, but yet secret data in past proofs still cannot ever be revealed. In the best case, the chain should be able to continue without a hitch.
 
@@ -93,7 +91,7 @@ A recent approximation of 2n<sup>2</sup> qubits needed to solve discrete log via
 
 We hope that people will choose the appropriate algorithm for their chosen point on the interactivity-quantum secrecy tradeoff for their application, and hope that including this information helps folks make the right choice for themselves. Folks prioritizing shorter term secrecy, like DAO voting or confessions of the young who will likely no longer care when they’re old, might prioritize this document’s nullifier construction, but whistleblowers or journalists might want to consider the semaphore construction instead.
 
-**New Usecases Enabled**
+**New usecases enabled**
 
 Ok, so let’s say we go through all of the work to create such a canonical system, and manage to get all hardware wallets and browser wallets to implement it (or even just one). What can we do now, with anonymous uniqueness?
 
@@ -107,7 +105,7 @@ We can also build more user-friendly dark pools, where instead of leaking the nu
 
 We think that wallets that adopt this standard first will hold the key for their users being able to interact with the next generation of ZK applications first. We’re bullish on a future where this is a standard as commonplace as ECDSA signing, within every secure enclave.
 
-**Next Steps**
+**Next steps**
 
 So far, we have the [Gupta-Gurkan nullifier paper proving all the security proofs](https://aayushg.com/thesis.pdf), repository with the [nullifier calculation in Rust](https://github.com/zk-nullifier-sig/zk-nullifier-sig/), with [working circom circuits](https://github.com/geometryresearch/secp256k1_hash_to_curve/), and a [Metamask snap](https://ethglobal.com/showcase/zk-nullifier-snap-6a9sq) to calculate it.
 
