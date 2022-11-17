@@ -1,18 +1,61 @@
 ---
 title: "Efficient private ECDSA signature verification"
 date: 2022-11-10T22:12:03.284Z
-authors: ["Dan Tehrani"]
+authors: ["Dan Tehrani and vivboop"]
 type: posts
 draft: false
 slug: "efficient-ecdsa"
 category: "5 mins read"
 tags: ["cryptography"]
 description: "Reviewing a construction to reduce constraints for private ECDSA signature verification"
+math: true
 ---
 
-ECDSA is one of the most popular digital signature algorithms in the blockchain space. Although there are alternative signature schemes that are considered to be simpler and sometimes better than ECDSA (e.g. EdDSA, Schnorr, BLS), major blockchains like Bitcoin and Ethereum are built on ECDSA. Therefore, ECDSA compatibility becomes crucial for integrating with the existing identity layer of major blockchains today.
+---
 
-Unfortunately, zkSNARKs and ECDSA do not go well with each other. More precisely, a zkSNARK that verifies ECDSA signatures requires an awkward implementation and is not really practical in privacy applications. We will not go in-depth about why that is the case in this blog post, but you can read more about it [here](https://0xparc.org/blog/zk-ecdsa-2).
+# Outline for Post
+
+Link to original: https://www.notion.so/personae-labs/zkSNARK-efficient-ECDSA-blog-post-bb3957d7e5534155b73e5c07aae443ea
+
+## Intro
+
+1. Introduce ECDSA (identity layer of Ethereum/Bitcoin, secp256k1, verifying ECDSA signature -> verifies ownership of address)
+2. If you want to act pseudonymously as a member of an on-chain group, need to wrap signature verify in a zkSNARK (along with a merkle tree check, explain that ECDSA is snark-unfriendly)
+3. If user generates these proofs on their device, no one can doxx (no middleman in this process, user owns their data, briefly introduce alternate models from Sismo/BWL/Semaphore)
+4. We also don't always need on-chain verification for interesting apps (introduce heyanon/storyform, verification cost can be larger)
+5. Given this setup, can we move some computation outside of the SNARK to save proving time?
+
+## Rearranging the equation
+
+Go through version of circuit that doesn't involve any precomputed multiples and just uses SecpMultiply. We should also add this circuit to codebase to show how much precomputation helps. Also I'm not actually 100% sure what the savings are lol.
+
+## Pre-computing multiples
+
+Explain how precomputing multiples can speed up the multiplication. Different from circom-ecdsa where they just precomputed multiples of the generator, we precompute multiples of a non-fixed point using a seperate WASM binary
+
+## Can we still verify on-chain?
+
+same as below
+
+## To keccak or not to keccak
+
+Should note that on-chain groups can sometimes be all addresses (for example, an airdrop) but if everyone in the on-chain group has made a transaction (for example, a group of people that bought an SBT) means you can extract the public key and can make the group directly with public keys. Thus, you can skip the costly keccak operation.
+
+## From here
+
+same as below
+
+---
+
+<!-- ### On-chain groups
+
+In privacy applications like [Tornado Cash](https://github.com/tornadocash), [Heyanon](https://heyanon.xyz/), and [Storyform](http://storyform.xyz/), users are able to prove statements without revealing their identities. In private coins like Tornado Cash, you can prove that you own a private key that corresponds to a particular UTXO in the UTXO Merkle tree, without revealing which UTXO you are trying to spend. And in Heyanon and Storyform, you can broadcast a message alongside a zero-knowledge proof that you belong to a particular group of people (e.g. you own a Devcon Bogota POAP).
+
+ECDSA is one of the most popular digital signature algorithms in the blockchain space, with both Ethereum and Bitcoin using ECDSA on the secp256k1 curve. These ECDSA public keys form part of "identity layer" of web3, and
+
+For example, Ethereum and Bitcoin both use ECDSA on the secp256k1 curve, meaning ECDSA compatibility is crucial for integrating with the existing identity layer of major blockchains today.
+
+Unfortunately, zkSNARKs and ECDSA do not pair well. More precisely, a zkSNARK that verifies ECDSA signatures requires an expensive implementation for full correctness, and as a result is not currently practical for privacy applications. We will not go in-depth about why that is the case in this blog post, but you can read more about it [here](https://0xparc.org/blog/zk-ecdsa-2).
 
 ### Privacy applications and ECDSA
 
@@ -20,15 +63,15 @@ In privacy applications like [Tornado Cash](https://github.com/tornadocash), [He
 
 In a lot of cases, these privacy applications would want to leverage the existing ECDSA identity layer of blockchains like Ethereum. Although as said at the beginning of this blog post, zkSNARKs which is the foundation of these privacy applications, and ECDSA don’t work with each other well.
 
-But as a result of [some iterations of ideas](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629), we have found that there are techniques that can be applied to make these two cryptographic primitives work together better.
+But as a result of [some iterations of ideas](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629), we have found that there are techniques that can be applied to make these two cryptographic primitives work together better. -->
 
-## Efficient ECDSA signature verification for zkSNARKs
+## Efficient ECDSA signature verification inside a zkSNARK
 
-A basic ECDSA signature verification circuit written in Circom results in an R1CS with approximately 1.5 million constraints, a proving key that is close to a GB large, and a proving time [that is non-trivial](https://github.com/0xPARC/circom-ecdsa#benchmarks).
+A basic ECDSA signature verification circuit written in Circom results in an R1CS with approximately 1.5 million constraints, a proving key that is close to a GB large, a constant sized proof, and a proving time [that is non-trivial](https://github.com/0xPARC/circom-ecdsa#benchmarks). We propose a method that reduces the required R1CS constraints to 163,239 and a proving key size that is 119MB large, but at the cost of a larger proof with more public inputs.
 
-We propose a method that reduces the required R1CS constraints to 163,239 and a proving key size that is 119MB large. This is accomplished by modifying the ECDSA verification to off-load computations from the zkSNARK.
+This is accomplished by modifying the ECDSA verification to off-load computations from the zkSNARK.
 
-The verification equation of a signature (r, s) is as follows
+The standard ECDSA verification equation of a signature $(r, s)$ is:
 
 $$
 s * R = m * G + r * Qa
@@ -37,30 +80,22 @@ $$
 where
 
 $$
-R \rightarrow \text{point with $r$ as its x-coordinate} \\
-G \rightarrow \text{generator point of secp256k1} \\
+R \rightarrow \text{point with $r$ as its x-coordinate} \\\
+G \rightarrow \text{generator point of secp256k1} \\\
 Qa \rightarrow \text{public key}
 $$
 
-We want to verify that the given (r, s) is indeed a signature of $Qa$, but without knowing about $Qa$. **Since $r$ doesn’t reveal anything about the public key, we can do the calculation pertaining to $r$, _outside_ of the zkSNARK.**
+We want to verify that the given $(r, s)$ is indeed a signature of $Qa$, but without knowing about $Qa$. At first, we attempted to
 
-We re-shape the equation as
+**Since $r$ doesn’t reveal anything about the public key, we can do the calculation pertaining to $r$ _outside_ of the zkSNARK.** We rewrite the equation as
 
 $$
-\begin{align*}
-r^{-1}s * R &= r^{-1}m * G + Qa \\
-r^{-1}s * R - r^{-1}m * G &= Qa \\
+\begin{aligned}
+r^{-1}s * R &= r^{-1}m * G + Qa \\\
+r^{-1}s * R - r^{-1}m * G &= Qa \\\
 s(r^{-1} * R) - (r^{-1}m * G) &= Qa
-\end{align*}
+\end{aligned}
 $$
-
-and pass the elliptic curve points
-
-$$
-r^{-1}m * G\\r^{-1} * R
-$$
-
-as the public inputs.
 
 The resulting zkSNARK will be
 
@@ -76,12 +111,13 @@ The resulting zkSNARK will be
   $$
   Qa
   $$
-- Checks
+
+* Checks
   - Using zkSNARK
     $$
     s * T + U = Qa
     $$
-  - Outside of the zkSNARK
+  * Outside of the zkSNARK
     - Check that U and T are correct
 
 As a result, we are only required to do a single point scalar multiplication and a single point addition inside a zkSNARK.
