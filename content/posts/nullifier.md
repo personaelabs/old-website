@@ -8,6 +8,7 @@ slug: "nullifier"
 category: "20 mins read"
 tags: ["nullifier", "zk"]
 description: "Unique pseudonymity??"
+math: true
 ---
 
 **ZK ID systems**
