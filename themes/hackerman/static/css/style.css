@@ -137,3 +137,10 @@ p code {
 blockquote {
   font-style: italic;
 }
+
+img[src$='#eip-4844']
+{
+    display: block;
+    margin: auto; 
+    width: 133px;
+}
