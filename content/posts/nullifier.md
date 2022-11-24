@@ -55,7 +55,9 @@ Note that hash has to be a function that hashes directly to the curve, meaning t
 
 ![math](../../media/nullifier_math.png)
 
-Private to everyone except the secure enclave chip:<br />
+<!-- Note that this LaTeX is pretty poorly formatted -->
+
+<!-- Private to everyone except the secure enclave chip:<br />
 $sk$<br />
 $r$<br /><br />
 Public to world, calculated inside secure enclave:<br />
@@ -70,7 +72,7 @@ Verifier checks in SNARK (calculated locally, private to world):<br />
 $g^{[r + sk*c]} / (g^{sk})^c = g^r$<br />
 $hash[m, g^{sk}][r + sk * c] / (hash[m, pk]^{sk})^{c} = hash[m, pk]^r$<br />
 $c = hash2(g, g^{sk}, hash[m, g^{sk}], hash[m, pk]^{sk}, g^r, hash[m, pk]^r)$<br />
-the set inclusion check of the public key
+the set inclusion check of the public key -->
 
 Note that in practice, we omit the last 2 optional private signals and skip the first two verifier checks, because we can recalculate the two optional outputs from the rest, and the hash output check will still pass and verify them all. Also, for wallets that separate the secure element with the secret key from the general computation chip, we usually do the hashing and calculations outside the secure element itself, and only need the secure element to call the function that multiplies our provided generator points by the secret key (represented by exponentiation here).
 
@@ -89,6 +91,7 @@ This is promising since hardware wallets only need to be able to calculate hash 
 Note that in the far future, once quantum computers can break ECDSA keypair security, most Ethereum keypairs will be broken, but migration to a quantum resistant keypair in advance will keep active funds safe. Specifically, people can merely sign messages committing to new quantum-resistant keypairs (or just higher bit keypairs on similar algorithms), and the canonical chain can fork to make such keypairs valid. ZK-SNARKs become forgeable, but yet secret data in past proofs still cannot ever be revealed. In the best case, the chain should be able to continue without a hitch.
 
 However, if people rely on any type of deterministic nullifier like our construction, their anonymity is immediately broken: someone can merely derive the secret keys for the whole anonymity set, calculate all the nullifiers, and see which ones match. This problem will exist for any deterministic nullifier algorithm on ECDSA, since revealing the secret key reveals the only source of “randomness” that guarantees anonymity in a deterministic protocol.
+![quantum_tradeoff](../../media/quantum_tradeoff.png)
 
 If people want to keep post-quantum secrecy of data, you have to give up at least one of our properties: the easiest one is probably non-interactivity. For example, for the zero knowledge airdrop, each account in the anonymity set publicly signs a commitment to a new semaphore id commitment (effectively address pk publishes hash[randomness | external nullifier | pk]). Then to claim, they reveal their external nullifier and ZK prove it came from one of the semaphore ids in the anonymity set. This considerably shrinks the anonymity set to everyone who has opted in to a semaphore commitment prior to that account claiming.
 
