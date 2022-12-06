@@ -4,7 +4,7 @@ date: 2022-11-10T22:12:03.284Z
 authors: ["Personae"]
 type: posts
 draft: true
-slug: "efficient-ecdsa"
+slug: "efficient-ecdsa-2"
 category: "5 mins read"
 tags: ["cryptography"]
 description: "Reviewing implementai"
