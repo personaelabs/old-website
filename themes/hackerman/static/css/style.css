@@ -16,7 +16,7 @@ body {
 
 main {
   padding: 0 1rem 2rem 1rem;
-  max-width: 600px;
+  max-width: 750px;
   height: 100%;
   font-family: "EB Garamond", serif;
   display: flex;
@@ -64,7 +64,7 @@ ul {
   text-align: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 750px) {
   nav {
     flex-grow: 0.2;
     display: flex;
@@ -74,7 +74,7 @@ ul {
   }
 }
 
-@media (min-width: 600px) {
+@media (min-width: 750px) {
   nav {
     flex-grow: 0.2;
     display: flex;
@@ -166,7 +166,6 @@ table {
 }
 #TableOfContents ul {
   padding-left: 0;
-  padding-bottom: 0.5rem;
 }
 #TableOfContents ul:not(:first-child) {
   padding-left: 2rem;

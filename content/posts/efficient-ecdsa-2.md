@@ -7,7 +7,7 @@ draft: true
 slug: "efficient-ecdsa-2"
 category: "5 mins read"
 tags: ["cryptography"]
-description: "Reviewing implementai"
+description: "Second part"
 math: true
 ---
 
@@ -71,3 +71,7 @@ But if we are operating under a different restricted assumption (e.g. we can sig
 ## From here
 
 We have implemented the method in Circom using Groth16 as the proving system, but with the advent of proving systems such as Halo2, we could make proving even more lightweight (we hope to release the Halo2 implementation soon!). The benchmarks above are measured on a Macbook Pro with an M1 Pro chip, and still require a proving time that is not pleasant in terms of UX. Making proving faster in high-end laptops is the first step, but realizing proving on mobile devices is another chasm.
+
+## Groth16 notes
+
+This research may be some of our final work with pure Groth16, as our research shifts fully to newer proving stacks using PLONKish arithmetizations and alternate backends like Halo2, Nova, and Spartan. To be clear, Groth16 isn't going away anytime soon; its constant verification time is just too good for on-chain verification. However, instead of compiling entire circuits to Groth16, we will compile using a different backend, and then verify the outputted proof in a Groth16 circuit. In other words, we likely start to use Groth16 as a _proof compressor_ rather than a full proving system.
