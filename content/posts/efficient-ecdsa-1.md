@@ -1,6 +1,6 @@
 ---
 title: "Efficient ZK ECDSA (part 1)"
-date: 2022-11-10T22:12:03.284Z
+date: 2022-11-30T22:12:03.284Z
 authors: ["Personae"]
 type: posts
 draft: false
