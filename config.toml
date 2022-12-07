@@ -24,3 +24,9 @@ description = "Tools for character creation"
     pre = "discord"
     url = "https://discord.gg/ZVWhZrbkRV"
     weight = 4
+
+[markup]
+  [markup.tableOfContents]
+    startLevel = 1
+    endLevel = 5
+    ordered = false

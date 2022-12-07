@@ -16,12 +16,12 @@ body {
 
 main {
   padding: 0 1rem 2rem 1rem;
-  max-width: 800px;
+  max-width: 750px;
   height: 100%;
   font-family: "EB Garamond", serif;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
+  margin: auto auto;
 }
 
 .mainPage,
@@ -45,9 +45,16 @@ main {
   text-align: center;
 }
 
-p,
-li {
+p {
   font-size: 1.2em;
+}
+
+ol {
+  font-size: 1em;
+}
+
+ul {
+  font-size: 1em;
 }
 
 .footer {
@@ -57,12 +64,24 @@ li {
   text-align: center;
 }
 
-nav {
-  flex-grow: 0.2;
-  display: flex;
-  justify-content: flex-end;
-  font-size: 1.2em;
-  padding: 2rem;
+@media (max-width: 750px) {
+  nav {
+    flex-grow: 0.2;
+    display: flex;
+    justify-content: center;
+    font-size: 1.2em;
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 750px) {
+  nav {
+    flex-grow: 0.2;
+    display: flex;
+    justify-content: flex-end;
+    font-size: 1.2em;
+    padding: 2rem;
+  }
 }
 
 .nav-link {
@@ -75,7 +94,8 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
+  color: black;
+  background-color: #f6d2e0;
 }
 
 .letter-head {
@@ -90,12 +110,6 @@ a:hover {
   flex-direction: column;
   justify-content: end;
   margin-left: auto;
-}
-
-@media screen and (max-width: 450px) {
-  .optional {
-    display: none;
-  }
 }
 
 pre,
@@ -136,4 +150,33 @@ p code {
 
 blockquote {
   font-style: italic;
+}
+
+table {
+  border-width: 1px;
+  border-color: black;
+}
+
+#TableOfContents {
+  display: block;
+  background: #f6d2e0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 1.2em;
+}
+#TableOfContents ul {
+  padding-left: 0;
+}
+#TableOfContents ul:not(:first-child) {
+  padding-left: 2rem;
+  font-size: 90%;
+}
+#TableOfContents li {
+  display: inherit;
+  color: black;
+}
+#TableOfContents li a {
+  color: inherit;
+  text-align: left;
+  padding: 0;
 }
