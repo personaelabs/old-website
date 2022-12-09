@@ -10,7 +10,6 @@ body {
   width: 100vw;
   background: #eeeff2;
   color: black;
-
   --background-block: #eee;
 }
 
@@ -47,6 +46,7 @@ main {
 
 p {
   font-size: 1.2em;
+  line-height: 1.5em;
 }
 
 ol {
