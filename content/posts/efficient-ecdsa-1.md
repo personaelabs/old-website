@@ -112,7 +112,7 @@ which we substitute above to get
 
 $$ s \* T + U = Q_a $$
 
-Because $T$ and $U$ are defined using $R$ and $m$, we can compute them outside of the SNARK and pass them in as public inputs. And so with this rewrite we only need to do 1 `Secp256k1ScalarMult` and 1 `Secp256k1AddUnequal` inside of the circuit. Okay, 3 operations cut! Is this progress?
+Because $T$ and $U$ are defined using $R$, $r$, and $m$, we can compute them outside of the SNARK and pass them in as public inputs. And so with this rewrite we only need to do 1 `Secp256k1ScalarMult` and 1 `Secp256k1AddUnequal` inside of the circuit. Okay, 3 operations cut! Is this progress?
 
 Unfortunately, this only cuts 100k constraints from the original 1.5mil constraint circuit, because `Secp256k1ScalarMult` is by far the most expensive operation. This is implemented as `ecdsa_verify_no_precompute` in this [file](https://github.com/personaelabs/efficient-zk-ecdsa/blob/8477a39b5a3735724981cd99d19cf36ddb9e8c51/circuits/ecdsa_verify_no_precompute.circom) for reference. But hope is not lost yet! This rearranged equation is key for our next insight.
 
