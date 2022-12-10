@@ -13,7 +13,9 @@ math: true
 
 <div id="spacing">
 
-This is the first post of a 2 part series on our research improving private ECDSA signature verification, stemming from this [ETHResearch post](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629) and implemented in this [repository](https://github.com/personaelabs/efficient-zk-ecdsa). In this post, we motivate our research and review our key insights. In the follow-up, we will provide a full security proof, discuss on-chain extensions, and introduce even faster implementations in proving systems like Halo2 and Nova.
+This is the first post of a two (maybe three?) part series on our research improving private ECDSA signature verification, stemming from this [ETHResearch post](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629) and implemented in this [repository](https://github.com/personaelabs/efficient-zk-ecdsa). In this post, we motivate our research and review our key insights. In the follow-up, we will provide a full security proof, discuss on-chain extensions, and introduce even faster implementations in proving systems like Halo2 and Nova.
+
+There will be some math in this post! It might look scary! But the key insights of the method are simple and should teach you some fun cryptography.
 
 {{< toc >}}
 
@@ -25,28 +27,26 @@ The **Elliptic Curve Digital Signature Algorithm**, or [ECDSA](https://en.wikipe
 
 Proving you know one of the private keys in a _group of public keys_ without revealing it is a necessary primitive for many of the anonymous speech applications Personae is interested in ([heyanon!](https://heyanon.xyz), [storyform](https://storyform.xyz), [HeyAnoun](https://heyanoun.xyz)). Surprisingly, this simple extension requires much heavier cryptographic machinery than a normal signature; there's an entire field of research dedicated to this problem called [**ring signatures**](https://en.wikipedia.org/wiki/Ring_signature). Unfortunately these methods aren't compatible with Ethereum/Bitcoin's ECDSA keys out of the box, so we opt to use an even more overpowered tool in zkSNARKs.
 
-The zkSNARK method privately inputs a group member's public key $pk$ and a signature $s$, and publicly inputs the entire group $G$ (usually succinctly as a [Merkle root](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/)). The circuit verifies $s$ was generated from $pk$ AND that $pk$ is in the group $G$. Sounds simple enough!
+The zkSNARK method, first [implemented by 0xPARC](https://github.com/0xPARC/circom-ecdsa), privately inputs a group member's public key $pk$ and a signature $s$, and publicly inputs the entire group $G$ (usually succinctly as a [Merkle root](https://decentralizedthoughts.github.io/2020-12-22-what-is-a-merkle-tree/)). The circuit verifies $s$ was generated from $pk$ AND that $pk$ is in the group $G$. Sounds simple enough!
 
-Unfortunately, the math for the signature verification is very SNARK-unfriendly. In particular, there's a lot of "wrong field arithmetic" --- the necessary operations happen over the [_base field_](https://zcash.github.io/halo2/background/curves.html#cycles-of-curves) of the secp256k1 curve which is different from the [_scalar field_](https://zcash.github.io/halo2/background/curves.html#cycles-of-curves) of the curves used in snarkjs. If that means nothing to you, don't worry -- it just means we have a huge blow-up in constraints to make sure all of our elliptic curve math is done correctly. And if that also means nothing to you, don't worry -- it just means computing a proof is very computation and memory-intensive, requiring ~1GB of proof metadata and ~5 minutes of browser computation on a MacBook. The [0xPARC blog post](https://0xparc.org/blog/zk-ecdsa-2) that first introduced this construction dives into this in more detail.
+Unfortunately, the math for the signature verification is very SNARK-unfriendly. In particular, there's a lot of "wrong field arithmetic" --- the necessary operations happen over the [_base field_](https://zcash.github.io/halo2/background/curves.html#cycles-of-curves) of the secp256k1 curve which is different from the [_scalar field_](https://zcash.github.io/halo2/background/curves.html#cycles-of-curves) of the curves used in snarkjs. If that means nothing to you, don't worry -- it just means we have a huge blow-up in constraints to make sure all of our elliptic curve math is done correctly. And if that also means nothing to you, don't worry -- it just means computing a proof is very computation and memory-intensive, requiring ~1GB of proof metadata and ~5 minutes of browser computation on a MacBook.
 
 ## Client-side proving
 
-Okay, so if our gigachad friends at 0xPARC already implemented this method in [circom-ecdsa](https://github.com/0xPARC/circom-ecdsa), why don't we just use that for our applications? Well, a 5 minute proving time that only works on high-end laptops is far from a viable UX. And generating proofs can't just be offloaded to the cloud -- for full privacy it's necessary these **proofs are computed on the user's device**. Otherwise you'll need to send your plaintext public key to a server to generate your proof, which grants it the power to break your anonymity if it wishes[^1]. There's some half-server half-client models that have been deployed; we analyze those further in the [appendix](#appendix-half-client--half-server-models) of this post.
+Okay, so if our gigachad friends at 0xPARC already implemented this method, why don't we just use that for our applications? Well, a 5 minute proving time that only works on high-end laptops is far from a viable UX. And generating proofs can't just be offloaded to the cloud -- for full privacy it's necessary these **proofs are computed on the user's device**. Otherwise you'll need to send your plaintext public key to a server to generate your proof, which grants it the power to break your anonymity if it wishes[^1]. There's some half-server half-client models that have been deployed; we analyze those further in the [appendix](#appendix-half-client--half-server-models) of this post.
 
 But we claim any solution with a server obscures the true unlock of zero-knowledge cryptography. Another framing of the importance of client-side proving is that it allows people to **generate authoritative claims of identity without any trusted party**, a power us measly humans didn't have until this technology started to become practical. This means the user can have full custody over their personal data instead of trusting other (potentially misaligned) institutions to manage and verify it.
 
 But the straightforward ZK ECDSA construction is just too expensive for everyone to run on their devices, especially mobile phones. And as more of identity moves on-chain with innovations in [DeSoc](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4105763) and [SBTs](https://www.radicalxchange.org/concepts/social-identity/), **private ECDSA group membership will be an increasingly important tool** in maintaining anonymity and owning more of our identity. And so starting with the ideas in this [post](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629), we've been on a journey to keep bringing the proving cost down until all devices can easily generate a proof.
 
-# Key insights
+# Notation
 
-## Take computation out of the SNARK
-
-Our first insight was that parts of the ECDSA signature verification equation could be taken out of the SNARK without sacrificing privacy. To see this, we'll review how ECDSA signatures work. Using similar notation to the [ECDSA wikipedia article](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm#Signature_verification_algorithm), we have the following terms:
+ECDSA signature verification has a bunch of moving parts. All operations are on elliptic curve points and happen modulo $n$, but you can mostly ignore those details for the sake of this post. Here are each of the variables we'll need:
 
 {{<table "table table-striped table-bordered">}}
 | Term | Definition |
 | :----: | :----: |
-| $G$ | generator |
+| $G$ | secp256k1 generator |
 | $n$ | order of group |
 | $k$ | random number $\lt n$ |
 | $R$ | $k * G$ |
@@ -55,6 +55,18 @@ Our first insight was that parts of the ECDSA signature verification equation co
 | $Q_a$ | public key defined as $a * G$ |
 | $m$ | hash of message |
 | $s$ | $k^{-1} (m + ar) \mod n$ |
+| $s^{-1}$ | $k (m + ar)^{-1} \mod n$ |
+{{</table>}}
+
+Here are specific `circom` functions from 0xPARC's `circom-ecdsa` that we reference:
+
+{{<table "table table-striped table-bordered">}}
+| Function | Inputs | Description |
+| :----: | :----: | :----: |
+| `BigMultModP` | `a, b, p` | compute $a * b \mod p$
+| `ECDSAPrivToPub` | `privkey` | multiply $G$ by `privkey` |
+| `Secp256k1AddUnequal` | `a, b` | add secp points `a` and `b` |
+| `Secp256k1ScalarMult` | `scalar, point` | multiply `point` by `scalar` |
 {{</table>}}
 
 An ECDSA signature from public key $Q_a$ on the hashed message $m$ is the pair $(r, s)$. The verification equation[^2] checks if:
@@ -63,7 +75,15 @@ $$
 R = ms^{-1} * G + rs^{-1} * Q_a
 $$
 
-which you can see in 0xPARC's [original implementation](https://github.com/0xPARC/circom-ecdsa/blob/d87eb7068cb35c951187093abe966275c1839ead/circuits/ecdsa.circom#L129). It's a good exercise to check the [correctness](https://en.wikipedia.org/wiki/Digital_signature#Definition) of this signature! For simplicity, we rewrite this as
+which you can follow in 0xPARC's [original implementation](https://github.com/0xPARC/circom-ecdsa/blob/d87eb7068cb35c951187093abe966275c1839ead/circuits/ecdsa.circom#L129). To get better intuition for this signature algorithm, we recommend you check [correctness](https://en.wikipedia.org/wiki/Digital_signature#Definition) -- that is, verify this equation will pass for a valid signature $(r, s)$!
+
+If you follow the original code and/or work through the above equation, you'll see that we need a total of 2 `BigMultModP`, 1 `ECDSAPrivToPub`, 1 `Secp256k1ScalarMult`, and 1 `Secp256k1AddUnequal` inside of the circuit, for a total of 1,508,136 constraints. We want to remove/optimize as many of these functions as possible!
+
+# Key insights
+
+## Take computation out of the SNARK
+
+Our first insight was that parts of the ECDSA signature verification equation could be taken out of the SNARK without sacrificing privacy. For simplicity we first rewrite the signature verification equation as
 
 $$
 s * R = m * G + r * Q_a
@@ -92,17 +112,17 @@ which we substitute above to get
 
 $$ s \* T + U = Q_a $$
 
-In the original method, we would've had to do a total of 2 field multiplies, 1 `PrivToPub`, 1 `SecpMultiply`, and 1 `SecpAdd` inside of the circuit. But because $T$ and $U$ are defined using $R$ and $m$, we can compute them outside of the SNARK. This means we only have to do 1 `SecpMultiply` and 1 `SecpAdd` inside of the circuit. Okay, 3 operations cut! Is this progress?
+Because $T$ and $U$ are defined using $R$ and $m$, we can compute them outside of the SNARK and pass them in as public inputs. And so with this rewrite we only need to do 1 `Secp256k1ScalarMult` and 1 `Secp256k1AddUnequal` inside of the circuit. Okay, 3 operations cut! Is this progress?
 
-Unfortunately, this only cuts 100k constraints from the original 1.5mil constraint circuit, because `SecpMultiply` is by far the most expensive operation. This is implemented as `ecdsa_verify_no_precompute` in this [file](https://github.com/personaelabs/efficient-zk-ecdsa/blob/8477a39b5a3735724981cd99d19cf36ddb9e8c51/circuits/ecdsa_verify_no_precompute.circom) for reference. But hope is not lost yet! This rearranged equation is key for our next insight.
+Unfortunately, this only cuts 100k constraints from the original 1.5mil constraint circuit, because `Secp256k1ScalarMult` is by far the most expensive operation. This is implemented as `ecdsa_verify_no_precompute` in this [file](https://github.com/personaelabs/efficient-zk-ecdsa/blob/8477a39b5a3735724981cd99d19cf36ddb9e8c51/circuits/ecdsa_verify_no_precompute.circom) for reference. But hope is not lost yet! This rearranged equation is key for our next insight.
 
 ## Precomputing point multiples
 
-The original 0xPARC code uses a clever optimization to speed up the `PrivToPub` subroutine, which multiples the generator point $G$ by a scalar $a$. Because $G$ is known in advance, the code stores _precomputed multiples_ of $G$ directly in the circuit to reduce the number of operations in `PrivToPub`.
+The original 0xPARC code uses a clever optimization to speed up the `ECDSAPrivToPub` subroutine, which multiples the generator point $G$ by a scalar $a$. Because $G$ is known in advance, the code stores _precomputed multiples_ of $G$ directly in the circuit to reduce the number of operations in `ECDSAPrivToPub`. The [0xPARC blog post](https://0xparc.org/blog/zk-ecdsa-2) dives into this in more detail.
 
-As $T$ is revealed publicly in our rearranged equation, we should be able to do the same technique on $T$ to speed up the `SecpMultiply` between $s$ and $T$! However, because $T$ changes for every proof, we need to compute these multiples on the fly and pass them in as public inputs. Using the notation of the [0xPARC code](https://0xparc.org/blog/zk-ecdsa-2#:~:text=In%20our%20implementation), we determined a `stride` of 8 was most efficient, meaning we compute $(2^{8i} * j) * T$ for all $i \in [0, 31], j \in [0,255]$. Precomputing these multiples directly in JS is very slow, so we rewrote the cache computation in Rust and [compiled to WASM](https://github.com/personaelabs/efficient-zk-ecdsa-wasm) to majorly reduce the overhead when proving in browser.
+As $T$ is revealed publicly in our rearranged equation, we should be able to do the same technique on $T$ to speed up the `Secp256k1ScalarMult` between $s$ and $T$! However, because $T$ changes for every proof, we need to compute these multiples on the fly and pass them in as public inputs. Using the notation of the [0xPARC code](https://0xparc.org/blog/zk-ecdsa-2#:~:text=In%20our%20implementation), we determined a `stride` of 8 was most efficient, meaning we compute $(2^{8i} * j) * T$ for all $i \in [0, 31], j \in [0,255]$. Precomputing these multiples directly in JS is very slow, so we rewrote the cache computation in Rust and [compiled to WASM](https://github.com/personaelabs/efficient-zk-ecdsa-wasm) to majorly reduce the overhead when proving in browser.
 
-This cache of points means we can skip a number of costly operations in normal `SecpMultiply`, bringing our total constraints to 163,239. This is a more than **9x** drop from the original circuit! The full method is:
+This cache of points means we can skip a number of costly operations in normal `Secp256k1ScalarMult`, bringing our total constraints to 163,239. This is a more than **9x** drop from the original circuit! The full method is:
 
 - Public inputs: $U$ and precomputed $T$ multiples
 - Private inputs: $s$, $Q_a$
@@ -112,7 +132,7 @@ This cache of points means we can skip a number of costly operations in normal `
     s * T + U = Q_a
     $$
   - Outside of the zkSNARK
-    - Check that $U$ and and precomputed multiples of $T$ are correctly computed
+    - Compute $U$ and precomputed multiples of $T$ in WASM
 
 which is implemented as `ecdsa_verify` [here](https://github.com/personaelabs/efficient-zk-ecdsa/blob/8477a39b5a3735724981cd99d19cf36ddb9e8c51/circuits/ecdsa_verify.circom) in circom.
 
@@ -142,7 +162,7 @@ If you want to do cutting-edge ZK research focused on bringing client-side provi
 
 # Appendix: half client & half server models
 
-There's an alternate construction pursued by other folks in the space that leads to more efficient proofs, but sacrifices full anonymity and requires a trusted server with an baby jub jub EdDSA public key $pk_s$. What in the world is a "baby jub jub EdDSA public key" and why do these constructions use it? We will break down each of these mystery words one by one. Disclaimer: we are not professionals at abstract algebra, just some people who like math and wanted to share what we've learned recently! Please reach out if there's any mistakes below!
+There's an alternate construction pursued by other folks in the space that leads to more efficient proofs, but sacrifices full anonymity and requires a trusted server with an baby jub jub EdDSA public key $pk_s$. What in the world is a "baby jub jub EdDSA public key" and why do these constructions use it? We will break down each of these mystery words one by one. Disclaimer: we are not professionals at abstract algebra, just some people who like math and want to share what we've learned recently! Please reach out if there's any mistakes below!
 
 ## Elliptic curve interlude
 
@@ -150,7 +170,7 @@ There's an alternate construction pursued by other folks in the space that leads
 
 The base field can be thought of "where the elliptic curve math happens", and the scalar field "where the circuit math happens". More precisely, let's define an elliptic curve $E_p$ where addition and multiplication is all done modulo a prime $p$, or in the finite field $\mathbb{F}_p$. The number of points on the curve in $\mathbb{F}_p$ will be a different value $q$, which is related to $p$ by [Hasse's wonderful theorem on elliptic curves](https://en.wikipedia.org/wiki/Hasse%27s_theorem_on_elliptic_curves) (wonderful is not in the original name, we added that). Roughly, the witness variables are encoded into these elliptic curve points, and because these points form a [group](https://en.wikipedia.org/wiki/Elliptic_curve#Elliptic_curves_over_finite_fields) all of the circuit math is done modulo $q$ or the finite field $\mathbb{F}_q$.
 
-Going back to baby jub jub, as its base field (where its elliptic curve math happens, like signature verification) is the same as BN254's scalar field (where the snarkjs circuit math happens), then we can just add and multiply curve points without bigint math or range checks! Don't worry if this doesn't fully make sense, we're just trying to give you intuition for why EdDSA on this specific curve is fast in snarkjs. It'll be more important to understand this for future ECDSA research posts.
+Going back to baby jub jub, as its base field (where its elliptic curve math happens, like signature verification) is the same as BN254's scalar field (where the snarkjs circuit math happens), then we can just add and multiply curve points in the circuit without bigint math or range checks! Don't worry if this doesn't fully make sense, we're just trying to give you intuition for why EdDSA on this specific curve is fast in snarkjs. It'll be more important to understand this for future ECDSA research posts.
 
 ## Proving setup
 
@@ -175,7 +195,7 @@ Due to these concerns, we don't see this approach being the long-term solution. 
 <!-- Footnotes themselves at the bottom. -->
 
 [^1]: You can technically use _even_ fancier cryptography like [MPC](https://eprint.iacr.org/2021/1530) or [FHE](https://sprl.it/) to avoid sending a plaintext public-key, but these methods are still in development.
-[^2]: The actual verification only checks that the x coordinate of the RHS is equal to $r$. However, if the verifier is given $R$ then checking the full equation is equivalent.
+[^2]: The actual verification only checks that $r$ is equal to the x coordinate of the RHS. This leads to $(r, -s)$ also being a valid signature. However, if the verifier is given $R$ then checking the full equation is equivalent.
 [^3]: In [deterministic ECDSA](https://datatracker.ietf.org/doc/html/rfc6979#section-3.2), $k$ isn't fully random and is roughly derived from a hash of the user's private key. Revealing $R$ generated deterministically is still secure in our method, which we analyze [here](https://hackmd.io/HQZxucnhSGKT_VfNwB6wOw#Does-R-leak-anything-about-s-and-Q_a).
 
 </div>
