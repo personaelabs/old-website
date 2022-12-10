@@ -1,5 +1,5 @@
 ---
-title: "Efficient ZK ECDSA (part 1)"
+title: "Efficient ZK ECDSA (1/n)"
 date: 2022-11-30T22:12:03.284Z
 authors: ["Personae"]
 type: posts
