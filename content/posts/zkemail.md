@@ -1,4 +1,16 @@
-[TOC]
+---
+title: "ZK Email"
+date: 2022-12-12T22:12:03.284Z
+authors: ["yush_g, sampriti"]
+type: posts
+draft: false
+slug: "zkemail"
+category: "15 mins read"
+tags: ["crypto"]
+description: "A cool way to do trustless email subset verification on chain, and what that unlocks"
+---
+
+<!-- [TOC] -->
 
 # Summary
 
@@ -6,7 +18,7 @@ Lack of trustless web2 and web3 integration is one of the leading reasons that b
 
 The oracle problem is exactly this -- there is no way to trustlessly ingest off-chain identities, stock prices, or physical actions onto web3, meaning that we have to trust intermediaries like Chainlink to do an API request for us to get that data. This fundamentally undercuts the premise of decentralization, if individual organizations can control and change all the data ingestion for blockchains at will.
 
-At Personae Labs, we are working in public to build out this primitive (along with working with folks from PSE for a next-gen version in Halo2). We think the most trustless method so far for web2-web3 integration is proof of email, due to the preponderance of existing signatures that can be verified on chain. We simultaneously are spinning off this work from 0xPARC into a fresh research group called the Signed Data Group within Personae Labs, in order to further this line of research. If problems like these excite you, reach out to @personae_labs to build with us! If you have questions on this as you read it, feel free to open a Github issue on the website repo, or reply, and we will do our best to clarify!
+At Personae Labs, we are [working in public](https://github.com/zk-email-verify/zk-email-verify) to build out this primitive (along with working with folks from PSE for a next-gen version in Halo2 along with adaptations to JWTs). We think the most trustless method so far for web2-web3 integration is proof of email, due to the preponderance of existing signatures that can be verified on chain. We simultaneously are spinning off this work from 0xPARC into a fresh research group called the Signed Data Group within Personae Labs, in order to further this line of research. If problems like these excite you, reach out to [me](https://twitter.com/yush_g) or [@personae_labs](https://twitter.com/personae_labs) to build with us! If you have questions on this as you read it, feel free to open a Github issue on the website repo, or reply, and we will do our best to clarify.
 
 # What it means to have trustlessly verified identity on chain
 
@@ -111,13 +123,17 @@ Note that if there is a nullifier on the message (Twitter handle, body hash, etc
 
 # How Serverless ZK Twitter Verification Works
 
-If you go to our MVP at https://zkemail.xyz, you can run the Twitter verification circuit (although right now there are bugs). You simply send a password reset email to yourself, and download the headers ("Download original email" in Gmail), then paste the contents of the email into the frontend. You can wait for the token to expire if you are worried about us taking it, or use an old reset email -- the thing we are looking for is any on-demand email from Twitter with your username, not the password reset string. Then, you click generate: this creates a ZK proof that verifies the email signature and ensures that only the user's chosen Ethereum address can use this proof to verify email ownership.
+The MVP that Sampriti, I, and lermchair are working on is at https://zkemail.xyz, which allows any user to run the Twitter username verification circuit (although right now there are bugs). You simply send a password reset email to yourself, and download the headers ("Download original email" in Gmail), then paste the contents of the email into the frontend. You can wait for the token to expire if you are worried about us taking it, or use an old reset email -- the thing we are looking for is any on-demand email from Twitter with your username, not the password reset string. Then, you click generate: this creates a ZK proof that verifies the email signature and ensures that only the user's chosen Ethereum address can use this proof to verify email ownership.
 
-So what exactly going on in this ZK circuit? Well, like every other email, we verify that the RSA signature in the DKIM holds when we hash your headers together. Specifically, the header check we verify is that the from email is in fact twitter.com. Then, we check the body: this is a second, nested hash. We save a ton of constraints by just regex-matching the string that precedes someone's Twitter username, then extracting the regex state that corresponds to a username. We make just that username public, and verify the hash holds by calculating the last 3 cycles of the Merkle-Damgard hash function, from the username match point onwards. There is no user-generated text of more than 15 characters in this area, so we know that the last such match must be from Twitter itself.
+So what exactly going on in this ZK circuit? Well, like every other email, we verify that the RSA signature in the DKIM holds when we hash your headers together. Specifically, the header check we verify is that the escaped "from:" email is in fact `@twitter.com`. To avoid people stuffing fields with fake information, we check the `\r\n` before `from` in the header: this cannot be stuffed or faked, since the email client would always escape the user text as `\\r\\n`.
+
+Then, we check the body: this is a second, nested hash in the header. We save a ton of constraints by just regex-matching the string that precedes someone's Twitter username, then extracting the regex state that corresponds to a username. We make just that username public, and verify the hash holds by calculating the last 3 cycles of the Merkle-Damgard hash function, from the username match point onwards. There is no user-generated text of more than 15 characters in this area, so we know that the last such match must be from Twitter itself.
 
 We also need to prevent [malleability](https://zips.z.cash/protocol/protocol.pdf), or the ability for someone external to view your proof, change some parameters, and generate another, unique proof that verifies. We do that by forcing the user to embed their Ethereum address in the proof, as described in [this post](https://www.geometryresearch.xyz/notebook/groth16-malleability) -- anyone stealing the proof would then just verify the same statement (that some Ethereum address owns some Twitter account).
 
-Then, the data gets sent to a smart contract to verify the signature. Why do we need a smart contract at all? Because DNS spoofing is too easy. Because most websites (Twitter included) do not use DNSSEC, there is no signature on the DNS response received -- this makes it very easy to man-in-the-middle the DNS request and give back the wrong public key. If we outsourced verification to anything except an immutable data store, its possible that they may decieved by a fake proof. But how do we get this data into the smart contract? It's hard coded in. People can analyze it by eye and verify themselves that the public key listed in the code matches the DNS record that they can view online or fetch from their computer. As that contract gains legitimacy, people can verify that the DNS record is in fact accurate. If we attempted to replicate the gaurantees of DNSSEC, by finding a way to issue our own signatures, the holder of the private key of the signature issuing would be a trusted failure point in the entire system. If we outsourced to the client themselves or a server, we open up an additional requirement on the DNS record not being spoofed at the moment in time that the client is verifying the proof. We can enable upgradability upon a switching of the public key through any number of decentralized governance methods, or by lobbying Twitter to enable DNSSEC.
+Then, the data gets sent to a smart contract to verify the signature. Why do we need a smart contract at all? Because DNS spoofing is too easy. Because most websites (Twitter included) do not use DNSSEC, there is no signature on the DNS response received -- this makes it very easy to man-in-the-middle the DNS request and give back the wrong public key. If we outsourced verification to anything except an immutable data store, its possible that they may decieved by a fake proof. But how do we get this data into the smart contract? It's hard coded in. People can analyze it by eye and verify themselves that the public key listed in the code matches the DNS record that they can view online or fetch from their computer.
+
+As that smart contract gains legitimacy and public acceptance, people can verify that the DNS record is in fact accurate, and if it's ever wrong, fork to the correct address: we expect community consensus to land on the correct key over time . If we attempted to replicate the gaurantees of DNSSEC, by finding a way to issue our own signatures, the holder of the private key of the signature issuing would be a trusted failure point in the entire system. If we outsourced to the client themselves or a server, we open up an additional requirement on the DNS record not being spoofed at the moment in time that the client is verifying the proof. We can enable upgradability upon a switching of the public key through any number of decentralized governance methods, or by lobbying Twitter to enable DNSSEC.
 
 # What will you build, anon?
 
@@ -131,9 +147,11 @@ Then, the data gets sent to a smart contract to verify the signature. Why do we 
 
 - A decentralized oracle for off chain data, putting price feeds on-chain
 
-- Anonymous Edward Snowden leaks (proving an email from the NSA was sent without revealing who you are)
+- Whistleblowing: imagine anonymous Edward Snowden–type leaks (proving an email from the NSA was sent without revealing who you are)
 
 - ZK Glassdoor / ZK Blind: this requires ZK-JWTs, an easy adaptation on top of our code
+
+- Decentralized anonymous KYC
 
 We are leading a new research group called the Signed Data Group within Personae Labs, in order to further each such application of this tech. We think that there are many signatures and emails like this hidden all over the internet, and we want to harness their power to bring all of web2 onto web3 without oracles. Reach out to [Personae](personaelabs.org) if you want to build with us, we would love to talk with anyone excited about this tech and support any builders with the resources to build this tech in public.
 
