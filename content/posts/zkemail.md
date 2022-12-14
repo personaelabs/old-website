@@ -57,17 +57,17 @@ ZK Proof Private:
 
 ZK Circuit Checks:
 
-sha256 and RSA both verify
+- sha256 and RSA both verify
 
-the message is well structured via regex
+- the message is well structured via regex
 
-the chosen regex state matches the mask provided
+- the chosen regex state matches the mask provided
 
 Contract Checks:
 
-sender domain == receiver domain
+- sender domain == receiver domain
 
-claimed RSA key == DNS-fetched/cached RSA key
+- claimed RSA key == DNS-fetched/cached RSA key
 
 Note that in the current iteration, each application needs its own regex string, which will need its own verifier function. This makes sense, as you want Twitter verification to have a different flow from company domain verification.
 
@@ -106,39 +106,36 @@ The sending mailserver can forge any fake message they want, as they own the pri
 ### 3. `The Receiving Mailserver`
 
 This server can read all of your mail in plaintext as well as the header, and so someone with keys to the receiver mailserver can also send real proofs for anyone in the domain (for instance, Gmail can read all of your mail). Luckily, anyone can use the S/MIME standard to combat this -- until wider adoption, we hope that mailservers don't abuse this power (you already trust that your mailserver is not reading your email or spoofing mail from you, so largely we already assume this).
-Note that if there is a nullifier on the message (twitter handle, body hash, etc), then these mailservers will also be able to de-anonymize people on chain -- since this again requires them breaching your trust to read your email, we expect existing privacy legislation to be a temporary preventative mechanism until email encryption is more widespread (like Skiff).
+
+Note that if there is a nullifier on the message (Twitter handle, body hash, etc), then these mailservers will also be able to de-anonymize people on chain -- since this again requires them breaching your trust to read your email, we expect existing privacy legislation to be a temporary preventative mechanism until email encryption is more widespread (like Skiff).
 
 # How Serverless ZK Twitter Verification Works
 
-If you go to our MVP at zkemail.xyz, you can run the Twitter verification circuit.
+If you go to our MVP at https://zkemail.xyz, you can run the Twitter verification circuit (although right now there are bugs). You simply send a password reset email to yourself, and download the headers ("Download original email" in Gmail), then paste the contents of the email into the frontend. You can wait for the token to expire if you are worried about us taking it, or use an old reset email -- the thing we are looking for is any on-demand email from Twitter with your username, not the password reset string. Then, you click generate: this creates a ZK proof that verifies the email signature and ensures that only the user's chosen Ethereum address can use this proof to verify email ownership.
 
-- Add notes about tricks to prevent [malleability](https://zips.z.cash/protocol/protocol.pdf) [need to add]
+So what exactly going on in this ZK circuit? Well, like every other email, we verify that the RSA signature in the DKIM holds when we hash your headers together. Specifically, the header check we verify is that the from email is in fact twitter.com. Then, we check the body: this is a second, nested hash. We save a ton of constraints by just regex-matching the string that precedes someone's Twitter username, then extracting the regex state that corresponds to a username. We make just that username public, and verify the hash holds by calculating the last 3 cycles of the Merkle-Damgard hash function, from the username match point onwards. There is no user-generated text of more than 15 characters in this area, so we know that the last such match must be from Twitter itself.
+
+We also need to prevent [malleability](https://zips.z.cash/protocol/protocol.pdf), or the ability for someone external to view your proof, change some parameters, and generate another, unique proof that verifies. We do that by forcing the user to embed their Ethereum address in the proof, as described in [this post](https://www.geometryresearch.xyz/notebook/groth16-malleability) -- anyone stealing the proof would then just verify the same statement (that some Ethereum address owns some Twitter account).
+
+Then, the data gets sent to a smart contract to verify the signature. Why do we need a smart contract at all? Because DNS spoofing is too easy. Because most websites (Twitter included) do not use DNSSEC, there is no signature on the DNS response received -- this makes it very easy to man-in-the-middle the DNS request and give back the wrong public key. If we outsourced verification to anything except an immutable data store, its possible that they may decieved by a fake proof. But how do we get this data into the smart contract? It's hard coded in. People can analyze it by eye and verify themselves that the public key listed in the code matches the DNS record that they can view online or fetch from their computer. As that contract gains legitimacy, people can verify that the DNS record is in fact accurate. If we attempted to replicate the gaurantees of DNSSEC, by finding a way to issue our own signatures, the holder of the private key of the signature issuing would be a trusted failure point in the entire system. If we outsourced to the client themselves or a server, we open up an additional requirement on the DNS record not being spoofed at the moment in time that the client is verifying the proof. We can enable upgradability upon a switching of the public key through any number of decentralized governance methods, or by lobbying Twitter to enable DNSSEC.
 
 # What will you build, anon?
 
-- People with at least $1M in their Chase account
+- People with at least $1M in their Chase bank account
 
-- People part of the XYZ Google group
-
-- People who made a degen call option on robinhood
+- People who verifiably made a degen call option on robinhood
 
 - People with 10M Twitter followers
 
-- Verify twitter account creation
-
 - Proving you're a top fan of an artist (via Spotify Wrapped email)
 
-- Tech company badge
+- A decentralized oracle for off chain data, putting price feeds on-chain
 
-- Price feeds
+- Anonymous Edward Snowden leaks (proving an email from the NSA was sent without revealing who you are)
 
-- Email leaks
+- ZK Glassdoor / ZK Blind: this requires ZK-JWTs, an easy adaptation on top of our code
 
-- ZK Glassdoor
-
-- ZK Blind
-
-- We are leading a new research group called the Signed Data Group within Personae Labs, in order to further this tech. We think that there are many primitives like this hidden on the internet, and we want to harness their power to bring all of web2 onto web3 without oracles. Reach out to Personae if you want to build with us, we would love to talk with anyone excited about this tech and support any builders!
+We are leading a new research group called the Signed Data Group within Personae Labs, in order to further each such application of this tech. We think that there are many signatures and emails like this hidden all over the internet, and we want to harness their power to bring all of web2 onto web3 without oracles. Reach out to [Personae](personaelabs.org) if you want to build with us, we would love to talk with anyone excited about this tech and support any builders with the resources to build this tech in public.
 
 <!-- Footnotes themselves at the bottom. -->
 
