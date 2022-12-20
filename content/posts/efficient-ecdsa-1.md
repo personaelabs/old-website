@@ -171,7 +171,7 @@ Thank you for making it to the end! Names within each group are sorted alphabeti
 
 # Appendix: half client & half server models
 
-There's an alternate construction pursued by other folks in the space that leads to more efficient proofs, but sacrifices full anonymity and requires a trusted server with an baby jub jub EdDSA public key $pk_s$. What in the world is a "baby jub jub EdDSA public key" and why do these constructions use it? We will break down each of these mystery words one by one. Disclaimer: we are not professionals at abstract algebra, just some people who like math and want to share what we've learned recently! Please reach out if there's any mistakes below!
+There's an alternate construction pursued by other folks in the space that leads to more efficient proofs, but sacrifices full anonymity and requires a trusted server with an baby jub jub EdDSA public key $pk_s$. What in the world is a "baby jub jub EdDSA public key" and why do these constructions use it? We will break down each of these mystery words one by one. Disclaimer: we are not professional number theorists, just some people who like math and want to share what we've learned recently! Please reach out if there's any mistakes below!
 
 ## Elliptic curve interlude
 
