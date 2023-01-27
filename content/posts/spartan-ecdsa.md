@@ -34,6 +34,8 @@ F_q\mathrm{: scalar\ field\ of\ secp256k1}
 \end{aligned}
 $$
 
+_The Sage code in [appendix 2](#appendix-2-secp--secq-cycle-in-sage) demonstrates how secp256k1 and secq256k1 relate._
+
 Importantly, secq256k1 has a scalar field order that is exactly the same size as $F_p$, which allows us to do most of the ECDSA arithmetic in **_right-field_**. Furthermore, not only we can do arithmetic in right-field , but also since secq256k1 forms a cycle with secp256k1, we can construct recursive proofs using the two curves; recursion allows us to combine multiple proofs into a single proof, without incurring additional costs on verification. This property will be important for building applications like [ETHDos](https://ethdos.xyz/), and also for verifying proofs on blockchains like Ethereum.[^2]
 
 ## Tricks from efficient-zk-ecdsa
@@ -104,7 +106,7 @@ Thanks for reading! Names within each group are sorted alphabetically by first n
 [^2]: It is important to note that unlike the [Pasta curves used in Halo2](https://electriccoin.co/blog/the-pasta-curves-for-halo-2-and-beyond/),the secp/secq curve cycle is not FFT friendly. Therefore it is not compatible per se with most of the FFT-based recursive systems unless ECFFTs can be used.
 ---
 
-# Appendix: Under the hood
+# Appendix 1: Under the hood
 _The following is an incomplete list of the components which comprise Spartan-ecdsa_.
 ## Upstream dependencies
 
@@ -131,3 +133,34 @@ We implement hash-to-curve for the secq256k1 curve, following the specification 
 
 **Poseidon** 
 [Poseidon](_https://eprint.iacr.org/2019/458.pdf_) is a zk-friendly hash function. We implement and instantiate Poseidon which hashes Secp256k1 field elements. The implementation was inspired by [Neptune](https://github.com/filecoin-project/neptune), a Poseidon implementation from [Filecoin](filecoin.io).
+
+# Appendix 2: Secp/Secq cycle in Sage
+{{< highlight "background-color: rgb(5, 5, 5)" >}}
+p = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
+q = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+
+# Secp256k1
+P = GF(p)
+aP = P(0x0000000000000000000000000000000000000000000000000000000000000000)
+bP = P(0x0000000000000000000000000000000000000000000000000000000000000007)
+Secp256k1 = EllipticCurve(P, (aP, bP))
+Secp256k1.set_order(q)
+
+# Secq256k1
+Q = GF(q)
+aQ = P(0x0000000000000000000000000000000000000000000000000000000000000000)
+bQ = P(0x0000000000000000000000000000000000000000000000000000000000000007)
+Secq256k1 = EllipticCurve(Q, (aQ, bQ))
+Secq256k1.set_order(p)
+
+print(
+"Secp256k1 group order == Secq256k1 base field order:",
+Secp256k1.order() == Secq256k1.base_field().cardinality()
+)
+
+print(
+"Secp256k1 base field order == Secq256k1 group order:", 
+Secp256k1.base_field().cardinality() ==  Secq256k1.order()
+)
+
+{{< /highlight >}}
