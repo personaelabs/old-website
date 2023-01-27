@@ -17,7 +17,7 @@ We introduce [Spartan-ecdsa](https://github.com/personaelabs/spartan-ecdsa), whi
 
 Spartan-ecdsa is based on the [Spartan Non-Interactive Zero-knowledge Proof (SpartanNIZK)](https://eprint.iacr.org/2019/550), which is a proving system in the Spartan zkSNARKs family. Spartan is a family of prover and verifier efficient zkSNARKs for proving R1CS satisfiability, developed by [Srinath Setty](https://twitter.com/srinathtv). SpartanNIZK doesn’t require a trusted setup, and most importantly in the case of ECDSA verification, **can work with on elliptic curve where discrete log holds**.
 
-This is uncommon in other popular elliptic curve based zkSNARK proof systems. For example, [Groth16](https://xn--2-umb.com/22/groth16/) and PSE's [fork of Halo2](https://github.com/privacy-scaling-explorations/halo2) use the KZG polynomial commitment which requires pairing-friendly curves like BN254. zcash's original [halo2](https://github.com/zcash/halo2) uses IPA and doesn't need pairing-friendly curves, but the scalar field of the curve must have [high 2-adicity](https://electriccoin.co/blog/the-pasta-curves-for-halo-2-and-beyond/) for efficient and practical FFT.[^1]
+This is uncommon in other popular elliptic curve based zkSNARK proof systems. For example, [Groth16](https://xn--2-umb.com/22/groth16/) and PSE's [fork of Halo2](https://github.com/privacy-scaling-explorations/halo2) require pairing-friendly curves like BN254. Zcash's original [Halo2](https://github.com/zcash/halo2) uses IPA and doesn't need pairing-friendly curves, but the scalar field of the curve must have [high 2-adicity](https://electriccoin.co/blog/the-pasta-curves-for-halo-2-and-beyond/) for efficient and practical FFT.[^1]
 
 The original implementation of SpartanNIZK uses the curve Curve25519 in its backend; in Spartan-ecdsa, we use the **_secq256k1 curve_**. This choice of curve allows us to perform **right-field arithmetic** for ECDSA verification, avoiding the costly range checks that have slowed down previous implementations.
 
@@ -34,7 +34,7 @@ F_q\mathrm{: scalar\ field\ of\ secp256k1}
 \end{aligned}
 $$
 
-Importantly, secq256k1 has a scalar field order that is exactly the same size as $F_p$, which allows us to do most of the ECDSA arithmetic in **_right-field_**. Furthermore, not only we can do arithmetic in right-field , but also since secq256k1 forms a cycle with secp256k1, we can construct recursive proofs using the two curves; recursion allows us to combine multiple proofs into a single proof, without incurring additional costs on verification. This property will be important when we want to verify proofs on blockchains like Ethereum.[^2]
+Importantly, secq256k1 has a scalar field order that is exactly the same size as $F_p$, which allows us to do most of the ECDSA arithmetic in **_right-field_**. Furthermore, not only we can do arithmetic in right-field , but also since secq256k1 forms a cycle with secp256k1, we can construct recursive proofs using the two curves; recursion allows us to combine multiple proofs into a single proof, without incurring additional costs on verification. This property will be important for building applications like [ETHDos](https://ethdos.xyz/), and also for verifying proofs on blockchains like Ethereum.[^2]
 
 ## Tricks from efficient-zk-ecdsa
 
