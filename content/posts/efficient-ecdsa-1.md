@@ -1,5 +1,5 @@
 ---
-title: "Efficient ZK ECDSA (1/n)"
+title: "Efficient ECDSA & the case for client-side proving"
 date: 2022-11-30T22:12:03.284Z
 authors: ["Personae"]
 type: posts
@@ -11,7 +11,7 @@ description: "Reviewing a construction to reduce constraints for private ECDSA s
 math: true
 ---
 
-This is the first post of a multi-part series on our research improving private ECDSA signature verification, stemming from this [ETHResearch post](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629) and implemented in this [repository](https://github.com/personaelabs/efficient-zk-ecdsa). In this post, we motivate our research and review our key insights. In the follow-up, we will provide a full security proof, discuss on-chain extensions, and introduce even faster implementations in proving systems like Halo2 and Nova.
+In this post, we introduce our research improving private ECDSA signature verification, stemming from this [ETHResearch post](https://ethresear.ch/t/efficient-ecdsa-signature-verification-using-circom/13629) and implemented in this [repository](https://github.com/personaelabs/efficient-zk-ecdsa). We also introduce the importance of **client-side proving** to unlock the full potential of zero-knowledge cryptography.
 
 There will be some math in this post! It might look scary! But the key insights of the method are simple and should teach you some fun cryptography.
 
