@@ -54,11 +54,14 @@ In the Spartan-ecdsa Typescript library, we provide an interface to prove member
 | Benchmark | # |
 | :----: | :----: |
 | Constraints | 8,076 |
-| Proving time | 4 seconds |
+| Proving time in browser | 4s |
+| Proving time in Node.js | 2s |
+| Verification time in browser | 1s |
+| Verification time in Node.js | 300ms |
 | Proof size | 16kb |
-| Verification time | tbd |
 {{</table>}}
-_Measured on a M1 MacBook Pro with 80Mbps internet speed_
+- _Measured on a M1 MacBook Pro with 80Mbps internet speed_
+- _Both proving and verification time in browser includes the time to download the circuit_
 
 The proving time has improved **by 10x** from [our previous implementation](https://github.com/personaelabs/efficient-zk-ecdsa). We believe that this magnitude of improvement will open the doors for more applications using membership proofs to be developed.
 
@@ -74,11 +77,18 @@ As shown in the above example, the inaccessibility of public keys requires us to
 | Benchmark | # |
 | :----: | :----: |
 | Constraints | 159,775 |
-| Proving time | 60 seconds |
+| Proving time in browser | 60s |
+| Proving time in Node.js | 40s |
+| Verification time in browser | 6s |
+| Verification time in Node.js | 1s |
 | Proof size | 38kb |
-| Verification time | tbd |
 {{</table>}}
+<<<<<<< HEAD
 _Measured on a M1 MacBook Pro with 80Mbps internet speed_
+=======
+- _Measured on a M1 MacBook Pro with 80Mbps internet speed_
+- _Both proving and verification time in browser includes the time to download the circuit_
+>>>>>>> 5333f59437c207410741a961cd169bf54be25ffb
 
 As the benchmark shows, proving membership to an Ethereum address group takes significantly longer. This is because we need to do a Keccak hash to convert a public key into an Ethereum address during proving.
 
