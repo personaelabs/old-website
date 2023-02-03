@@ -1,6 +1,6 @@
 ---
 title: "Introducing Spartan-ecdsa"
-date: 2023-01-14T00:00:00Z
+date: 2023-02-03T00:00:00Z
 authors: ["Personae"]
 type: posts
 draft: false
