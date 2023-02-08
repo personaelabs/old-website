@@ -24,6 +24,11 @@ description = "Tools for character creation"
     pre = "discord"
     url = "https://discord.gg/ZVWhZrbkRV"
     weight = 4
+  [[menu.main]]
+    name = "Twitter"
+    pre = "twitter"
+    url = "https://twitter.com/personae_labs"
+    weight = 5
 
 [markup]
   [markup.tableOfContents]
